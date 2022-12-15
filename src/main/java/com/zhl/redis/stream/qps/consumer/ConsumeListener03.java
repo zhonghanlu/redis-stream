@@ -14,21 +14,21 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * <h1>消费者 no.1</h1>
+ * <h1>消费者 no.3</h1>
  */
 @Slf4j
 @Component
-public class ConsumeListener01 implements StreamListener<String, MapRecord<String, String, String>> {
+public class ConsumeListener03 implements StreamListener<String, MapRecord<String, String, String>> {
 
     @Resource
     private RedisService redisService;
 
-    private static ConsumeListener01 consumeListener01;
+    private static ConsumeListener03 consumeListener03;
 
     @PostConstruct
     public void init() {
-        consumeListener01 = this;
-        consumeListener01.redisService = this.redisService;
+        consumeListener03 = this;
+        consumeListener03.redisService = this.redisService;
     }
 
     @Override
@@ -37,9 +37,9 @@ public class ConsumeListener01 implements StreamListener<String, MapRecord<Strin
         RecordId recordId = message.getId();
         Map<String, String> map = message.getValue();
         //接收到消息
-        log.info("消费者01  接收到消息:[{}],消息id:[{}]", map, recordId);
+        log.info("消费者03  接收到消息:[{}],消息id:[{}]", map, recordId);
         //进行ack 删除消息
-        consumeListener01.redisService.ack(stream, RedisPrefix.TEST_GROUP, recordId.getValue());
-        consumeListener01.redisService.del(stream, recordId.getValue());
+        consumeListener03.redisService.ack(stream, RedisPrefix.TEST_GROUP, recordId.getValue());
+        consumeListener03.redisService.del(stream, recordId.getValue());
     }
 }

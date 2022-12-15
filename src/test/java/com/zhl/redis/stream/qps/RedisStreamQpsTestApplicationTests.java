@@ -15,7 +15,6 @@ class RedisStreamQpsTestApplicationTests {
     @Test
     void contextLoads() {
 
-        redisService.batchSetQueue();
 
     }
 

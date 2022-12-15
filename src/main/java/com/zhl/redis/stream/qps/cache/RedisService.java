@@ -2,10 +2,15 @@ package com.zhl.redis.stream.qps.cache;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.stream.Record;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,8 +34,15 @@ public class RedisService {
     /**
      * 队列添加消息
      */
-    public String addQueue(String key, Map<String, String> map) {
-        return template.opsForStream().add(key, map).getValue();
+    public void addQueue(String key, List<Map> maps) {
+        SessionCallback<Object> sessionCallback = new SessionCallback<Object>() {
+            @Override
+            public Object execute(RedisOperations operations) throws DataAccessException {
+                maps.stream().forEach(data -> operations.opsForStream().add(key, data));
+                return null;
+            }
+        };
+        template.executePipelined(sessionCallback);
     }
 
     /**
