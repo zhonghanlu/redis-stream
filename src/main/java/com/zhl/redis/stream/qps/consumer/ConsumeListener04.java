@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -33,13 +35,35 @@ public class ConsumeListener04 implements StreamListener<String, MapRecord<Strin
 
     @Override
     public void onMessage(MapRecord<String, String, String> message) {
+        log.info("当前线程名：【{}】",Thread.currentThread().getName());
         String stream = message.getStream();
         RecordId recordId = message.getId();
         Map<String, String> map = message.getValue();
         //接收到消息
-        log.info("消费者04  接收到消息:[{}],消息id:[{}]", map, recordId);
-        //进行ack 删除消息
-        consumeListener04.redisService.ack(stream, RedisPrefix.TEST_GROUP, recordId.getValue());
-        consumeListener04.redisService.del(stream, recordId.getValue());
+        ExecutorService service = Executors.newWorkStealingPool();
+//        AtomicInteger index = new AtomicInteger();
+//        ExecutorService executor = new ThreadPoolExecutor(10, 20, 20, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>() , r -> {
+//            Thread thread = new Thread(r);
+//            thread.setName("async-stream-consumer-" + index.getAndIncrement());
+//            thread.setDaemon(true);
+//            return thread;
+//        });
+        try {
+//            service.submit(() -> {
+                new Thread(()->{
+                    log.info("当前线程名：【{}】，消费者04 消息id:[{}]",Thread.currentThread().getName(), recordId);
+                    try {
+                        Thread.sleep(new Random().nextInt(1999));
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    //进行ack 删除消息
+                    consumeListener04.redisService.ack(stream, RedisPrefix.TEST_GROUP_02, recordId.getValue());
+                    consumeListener04.redisService.del(stream, recordId.getValue());
+                });
+//            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

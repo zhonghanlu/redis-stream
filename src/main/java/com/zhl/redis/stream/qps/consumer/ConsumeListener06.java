@@ -16,21 +16,21 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * <h1>消费者 no.3</h1>
+ * <h1>消费者 no.5</h1>
  */
 @Slf4j
 @Component
-public class ConsumeListener03 implements StreamListener<String, MapRecord<String, String, String>> {
+public class ConsumeListener06 implements StreamListener<String, MapRecord<String, String, String>> {
 
     @Resource
     private RedisService redisService;
 
-    private static ConsumeListener03 consumeListener03;
+    private static ConsumeListener06 consumeListener06;
 
     @PostConstruct
     public void init() {
-        consumeListener03 = this;
-        consumeListener03.redisService = this.redisService;
+        consumeListener06 = this;
+        consumeListener06.redisService = this.redisService;
     }
 
     @Override
@@ -51,19 +51,20 @@ public class ConsumeListener03 implements StreamListener<String, MapRecord<Strin
         try {
 //            service.submit(() -> {
                 new Thread(()->{
-                    log.info("当前线程名：【{}】，消费者03 消息id:[{}]",Thread.currentThread().getName(), recordId);
+                    log.info("当前线程名：【{}】，消费者02 消息id:[{}]",Thread.currentThread().getName(), recordId);
                     try {
                         Thread.sleep(new Random().nextInt(1999));
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                     //进行ack 删除消息
-                    consumeListener03.redisService.ack(stream, RedisPrefix.TEST_GROUP_01, recordId.getValue());
-                    consumeListener03.redisService.del(stream, recordId.getValue());
+                    consumeListener06.redisService.ack(stream, RedisPrefix.TEST_GROUP_02, recordId.getValue());
+                    consumeListener06.redisService.del(stream, recordId.getValue());
                 });
 //            });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
 }
