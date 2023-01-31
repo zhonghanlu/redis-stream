@@ -35,7 +35,7 @@ public class ConsumeListener04 implements StreamListener<String, MapRecord<Strin
 
     @Override
     public void onMessage(MapRecord<String, String, String> message) {
-        log.info("当前线程名：【{}】",Thread.currentThread().getName());
+//        log.info("当前线程名：【{}】",Thread.currentThread().getName());
         String stream = message.getStream();
         RecordId recordId = message.getId();
         Map<String, String> map = message.getValue();
@@ -49,8 +49,8 @@ public class ConsumeListener04 implements StreamListener<String, MapRecord<Strin
 //            return thread;
 //        });
         try {
-//            service.submit(() -> {
-                new Thread(()->{
+            service.submit(() -> {
+//                new Thread(()->{
                     log.info("当前线程名：【{}】，消费者04 消息id:[{}]",Thread.currentThread().getName(), recordId);
                     try {
                         Thread.sleep(new Random().nextInt(1999));
@@ -60,8 +60,8 @@ public class ConsumeListener04 implements StreamListener<String, MapRecord<Strin
                     //进行ack 删除消息
                     consumeListener04.redisService.ack(stream, RedisPrefix.TEST_GROUP_02, recordId.getValue());
                     consumeListener04.redisService.del(stream, recordId.getValue());
-                });
-//            });
+//                }).start();
+            });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

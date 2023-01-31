@@ -41,7 +41,7 @@ public class ConsumeListener01 implements StreamListener<String, MapRecord<Strin
         Map<String, String> map = message.getValue();
         //接收到消息
         AtomicInteger index = new AtomicInteger();
-        ExecutorService service = Executors.newWorkStealingPool();
+        ExecutorService service = Executors.newFixedThreadPool(70);
 
 //        ExecutorService executor = new ThreadPoolExecutor(10, 20, 20, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>() , r -> {
 //            Thread thread = new Thread(r);
@@ -50,8 +50,8 @@ public class ConsumeListener01 implements StreamListener<String, MapRecord<Strin
 //            return thread;
 //        });
         try {
-//            service.submit(() -> {
-                new Thread(()->{
+            service.submit(() -> {
+//                new Thread(()->{
                     log.info("当前线程名：【{}】，消费者01 消息id:[{}]",Thread.currentThread().getName(), recordId);
                     try {
                         Thread.sleep(new Random().nextInt(1999));
@@ -61,8 +61,8 @@ public class ConsumeListener01 implements StreamListener<String, MapRecord<Strin
                     //进行ack 删除消息
                     consumeListener01.redisService.ack(stream, RedisPrefix.TEST_GROUP_01, recordId.getValue());
                     consumeListener01.redisService.del(stream, recordId.getValue());
-                }).start();
-//            });
+//                }).start();
+            });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

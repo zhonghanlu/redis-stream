@@ -29,12 +29,13 @@ public class RedisStreamConfiguration {
     @Bean(initMethod = "start", destroyMethod = "stop")
     public StreamMessageListenerContainer<String, MapRecord<String, String, String>> streamMessageListenerContainer() {
         AtomicInteger index = new AtomicInteger();
-        ExecutorService executor = Executors.newCachedThreadPool(r -> {
-            Thread thread = new Thread(r);
-            thread.setName("async-stream-consumer=======-" + index.getAndIncrement());
-            thread.setDaemon(true);
-            return thread;
-        });
+        ExecutorService executor = Executors.newFixedThreadPool(6);
+//        ExecutorService executor = Executors.newCachedThreadPool(r -> {
+//            Thread thread = new Thread(r);
+//            thread.setName("async-stream-consumer=======-" + index.getAndIncrement());
+//            thread.setDaemon(true);
+//            return thread;
+//        });
 //        ExecutorService executor = new ThreadPoolExecutor(6, 12, 200L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
 //                r -> {
 //                    Thread thread = new Thread(r);
@@ -47,7 +48,7 @@ public class RedisStreamConfiguration {
                 StreamMessageListenerContainer.StreamMessageListenerContainerOptions
                         .builder()
                         //一次拿多少数据
-                        .batchSize(2000)
+                        .batchSize(1500)
                         //运行Stream 的poll task
                         .executor(executor)
                         // Stream 中没有消息时，阻塞多长时间，需要比 `spring.redis.timeout` 的时间小
@@ -74,17 +75,17 @@ public class RedisStreamConfiguration {
         streamMessageListenerContainer.receive(Consumer.from(RedisPrefix.TEST_GROUP_01, RedisPrefix.TEST_GROUP_CONSUMER_NAME_03),
                 StreamOffset.create(streamKey, ReadOffset.lastConsumed()), new ConsumeListener03());
 
-        // 消费组no.04,不自动ack
-        streamMessageListenerContainer.receive(Consumer.from(RedisPrefix.TEST_GROUP_02, RedisPrefix.TEST_GROUP_CONSUMER_NAME_04),
-                StreamOffset.create(streamKey, ReadOffset.lastConsumed()), new ConsumeListener04());
-
-        // 消费组no.05,不自动ack
-        streamMessageListenerContainer.receive(Consumer.from(RedisPrefix.TEST_GROUP_02, RedisPrefix.TEST_GROUP_CONSUMER_NAME_05),
-                StreamOffset.create(streamKey, ReadOffset.lastConsumed()), new ConsumeListener05());
-
-        // 消费组no.06,不自动ack
-        streamMessageListenerContainer.receive(Consumer.from(RedisPrefix.TEST_GROUP_02, RedisPrefix.TEST_GROUP_CONSUMER_NAME_06),
-                StreamOffset.create(streamKey, ReadOffset.lastConsumed()), new ConsumeListener06());
+//        // 消费组no.04,不自动ack
+//        streamMessageListenerContainer.receive(Consumer.from(RedisPrefix.TEST_GROUP_01, RedisPrefix.TEST_GROUP_CONSUMER_NAME_04),
+//                StreamOffset.create(streamKey, ReadOffset.lastConsumed()), new ConsumeListener04());
+//
+//        // 消费组no.05,不自动ack
+//        streamMessageListenerContainer.receive(Consumer.from(RedisPrefix.TEST_GROUP_01, RedisPrefix.TEST_GROUP_CONSUMER_NAME_05),
+//                StreamOffset.create(streamKey, ReadOffset.lastConsumed()), new ConsumeListener05());
+//
+//        // 消费组no.06,不自动ack
+//        streamMessageListenerContainer.receive(Consumer.from(RedisPrefix.TEST_GROUP_01, RedisPrefix.TEST_GROUP_CONSUMER_NAME_06),
+//                StreamOffset.create(streamKey, ReadOffset.lastConsumed()), new ConsumeListener06());
 
         return streamMessageListenerContainer;
     }
